@@ -43,10 +43,23 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, error: 'Internal server error' });
 });
 
+async function connectWithRetry(maxAttempts = 10, delay = 5000) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await sequelize.authenticate();
+      logger.info('Database connected');
+      return;
+    } catch (err) {
+      console.error(`Database connection attempt ${attempt}/${maxAttempts} failed:`, err.message);
+      if (attempt === maxAttempts) throw err;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
 async function start() {
   try {
-    await sequelize.authenticate();
-    logger.info('Database connected');
+    await connectWithRetry();
 
     await sequelize.sync({ alter: false });
     logger.info('Database models synced');
