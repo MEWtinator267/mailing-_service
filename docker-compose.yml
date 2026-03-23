@@ -44,6 +44,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    command: sh -c "echo 'Waiting for services...' && sleep 5 && node src/app.js"
     ports:
       - '3001:3001'
     environment:
