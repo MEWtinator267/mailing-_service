@@ -1,17 +1,40 @@
 version: '3.9'
 
 services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: mailing-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - mailing-net
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
     build: .
     container_name: mailing-service
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - '3001:3001'
     environment:
       PORT: 3001
       NODE_ENV: production
-      # Supabase PostgreSQL Connection
-      DB_HOST: ${DB_HOST}
+      # PostgreSQL Connection
+      DB_HOST: ${DB_HOST:-postgres}
       DB_PORT: ${DB_PORT:-5432}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
@@ -42,3 +65,6 @@ networks:
   mailing-net:
     driver: bridge
     enable_ipv6: false
+
+volumes:
+  postgres_data:
