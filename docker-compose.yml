@@ -1,26 +1,6 @@
 version: '3.9'
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: mailing-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
-    networks:
-      - mailing-net
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER}']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   redis:
     image: redis:7-alpine
     container_name: mailing-redis
@@ -40,8 +20,6 @@ services:
     container_name: mailing-service
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
     ports:
@@ -82,5 +60,4 @@ networks:
     driver: bridge
     enable_ipv6: false
 
-volumes:
-  postgres_data:
+
