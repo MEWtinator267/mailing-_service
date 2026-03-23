@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome to <%= appName %>!</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; background-color: #f4f7f9; color: #1a1a2e; }
+    .wrapper { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .header { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 48px 40px; text-align: center; }
+    .header img { height: 40px; margin-bottom: 20px; }
+    .header h1 { color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+    .header p { color: rgba(255,255,255,0.85); font-size: 16px; margin-top: 8px; }
+    .body { padding: 40px; }
+    .greeting { font-size: 22px; font-weight: 600; margin-bottom: 16px; color: #1a1a2e; }
+    .text { font-size: 15px; line-height: 1.7; color: #4b5563; margin-bottom: 24px; }
+    .cta-btn { display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 15px; margin: 8px 0 24px; }
+    .steps { background: #f8fafc; border-radius: 10px; padding: 24px; margin: 24px 0; }
+    .steps h3 { font-size: 15px; font-weight: 600; color: #374151; margin-bottom: 16px; }
+    .step { display: flex; align-items: flex-start; margin-bottom: 14px; }
+    .step-num { background: #6366f1; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-right: 12px; margin-top: 1px; }
+    .step-text { font-size: 14px; color: #4b5563; line-height: 1.5; }
+    .step-text strong { color: #1a1a2e; }
+    .divider { border: none; border-top: 1px solid #e5e7eb; margin: 32px 0; }
+    .footer { padding: 24px 40px; background: #f8fafc; text-align: center; }
+    .social-links { margin-bottom: 12px; }
+    .social-links a { display: inline-block; margin: 0 8px; color: #6366f1; text-decoration: none; font-size: 13px; font-weight: 500; }
+    .footer-text { font-size: 12px; color: #9ca3af; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <% if (logoUrl) { %>
+        <img src="<%= logoUrl %>" alt="<%= appName %> logo" />
+      <% } %>
+      <h1>Welcome to <%= appName %>! 🎉</h1>
+      <p>We're thrilled to have you on board.</p>
+    </div>
+
+    <div class="body">
+      <p class="greeting">Hi <%= firstName %>,</p>
+
+      <p class="text">
+        Thank you for joining <strong><%= appName %></strong>! Your account has been successfully created
+        on <strong><%= registeredAt %></strong>. We can't wait for you to explore everything we have to offer.
+      </p>
+
+      <div style="text-align: center;">
+        <a href="<%= dashboardUrl %>" class="cta-btn">Go to Your Dashboard →</a>
+      </div>
+
+      <div class="steps">
+        <h3>Get started in 3 easy steps</h3>
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text"><strong>Complete your profile</strong> — Add your details so we can personalize your experience.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>Explore the dashboard</strong> — Discover all the features available to you.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text"><strong>Invite your team</strong> — Collaboration is better together. Bring your colleagues aboard.</div>
+        </div>
+      </div>
+
+      <p class="text">
+        If you have any questions or need help getting started, our support team is always here for you.
+        Just reply to this email or visit our help center.
+      </p>
+
+      <p class="text">
+        Welcome aboard,<br />
+        <strong>The <%= appName %> Team</strong>
+      </p>
+    </div>
+
+    <hr class="divider" style="margin: 0;" />
+
+    <div class="footer">
+      <div class="social-links">
+        <a href="#">Twitter</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Instagram</a>
+      </div>
+      <p class="footer-text">
+        You received this email because you signed up for <%= appName %>.<br />
+        © <%= new Date().getFullYear() %> <%= appName %>. All rights reserved.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

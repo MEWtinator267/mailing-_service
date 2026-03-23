@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    container_name: mailing-service
+    restart: unless-stopped
+    ports:
+      - '3001:3001'
+    environment:
+      PORT: 3001
+      NODE_ENV: production
+      # Supabase PostgreSQL Connection
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # Redis on EC2 #1 (EventRelay instance)
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      # SMTP Configuration
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      FROM_EMAIL: ${FROM_EMAIL}
+      FROM_NAME: ${FROM_NAME}
+      # Application Configuration
+      APP_NAME: ${APP_NAME:-EventRelay}
+      APP_DASHBOARD_URL: ${APP_DASHBOARD_URL}
+      APP_LOGO_URL: ${APP_LOGO_URL:-}
+      OFFERS_DATA_SOURCE: ${OFFERS_DATA_SOURCE:-database}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET}
+    networks:
+      - mailing-net
+
+networks:
+  mailing-net:
+    driver: bridge
+    enable_ipv6: false
