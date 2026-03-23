@@ -62,7 +62,8 @@ async function start() {
       });
     });
   } catch (err) {
-    logger.error('Failed to start service', { error: err.message });
+    logger.error('Failed to start service', { error: err.message, stack: err.stack });
+    console.error('STARTUP ERROR:', err);
     process.exit(1);
   }
 }
