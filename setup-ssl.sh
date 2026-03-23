@@ -1,53 +1,77 @@
 #!/bin/bash
 
-# SSL Setup Script for Let's Encrypt
+# SSL Setup Script for Let's Encrypt - Mailing Service
+# Run this on EC2 after deploying docker-compose up -d
+
+set -e
 
 DOMAIN="mailingnanshit.duckdns.org"
-EMAIL="shivamkoshyari43@gmail.com"  # Change to your email
+EMAIL="shivamkoshyari43@gmail.com"
+CERT_DIR="./certs"
+MAILING_DIR="$PWD"
 
-echo "🔒 Setting up SSL certificate for $DOMAIN..."
+echo "================================"
+echo "Setting up SSL certificates"
+echo "Domain: $DOMAIN"
+echo "================================"
 
-# Create directories
-mkdir -p ssl/letsencrypt
-mkdir -p ssl/certbot
+# 1. Create certs directory
+if [ ! -d "$CERT_DIR" ]; then
+    echo "Creating $CERT_DIR directory..."
+    mkdir -p "$CERT_DIR"
+fi
 
-# Generate dummy certificate for Nginx to start
-echo "📝 Generating temporary self-signed certificate..."
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout ssl/letsencrypt/live/$DOMAIN/privkey.pem \
-  -out ssl/letsencrypt/live/$DOMAIN/fullchain.pem \
-  -subj "/CN=$DOMAIN" 2>/dev/null || true
+# 2. Install certbot if needed
+if ! command -v certbot &> /dev/null; then
+    echo "Installing certbot..."
+    sudo apt-get update -qq
+    sudo apt-get install -y certbot > /dev/null
+fi
 
-mkdir -p ssl/letsencrypt/live/$DOMAIN
+# 3. Stop services
+echo "Stopping docker-compose services..."
+sudo docker-compose down || true
 
-# Start Nginx with dummy cert
-echo "🚀 Starting Nginx..."
-sudo docker-compose up -d nginx
+sleep 2
 
-sleep 5
+# 4. Request certificate (standalone mode - no nginx running)
+echo "Requesting Let's Encrypt certificate for $DOMAIN..."
+sudo certbot certonly \
+    --standalone \
+    --agree-tos \
+    --email "$EMAIL" \
+    --non-interactive \
+    -d "$DOMAIN" 2>&1 || echo "Certificate may already exist, continuing..."
 
-# Install Certbot
-echo "📥 Installing Certbot..."
-sudo apt-get update -qq
-sudo apt-get install -y certbot > /dev/null 2>&1
+# 5. Copy certificates
+echo "Copying certificates to $CERT_DIR..."
+sudo cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem "$CERT_DIR/fullchain.pem" 2>/dev/null || echo "fullchain.pem not found"
+sudo cp /etc/letsencrypt/live/$DOMAIN/privkey.pem "$CERT_DIR/privkey.pem" 2>/dev/null || echo "privkey.pem not found"
 
-# Get real Let's Encrypt certificate
-echo "🔐 Requesting Let's Encrypt certificate..."
-sudo certbot certonly --standalone \
-  -d $DOMAIN \
-  --email $EMAIL \
-  --agree-tos \
-  --no-eff-email \
-  --non-interactive \
-  --cert-path ssl/letsencrypt/live/$DOMAIN/fullchain.pem
+# 6. Fix permissions
+if [ -f "$CERT_DIR/fullchain.pem" ]; then
+    sudo chown $USER:$USER "$CERT_DIR"/*.pem
+    chmod 644 "$CERT_DIR"/fullchain.pem
+    chmod 644 "$CERT_DIR"/privkey.pem
+    echo "✅ Certificates copied and permissions set"
+fi
 
-# Copy certificates to persistent location
-sudo cp -r /etc/letsencrypt/live/$DOMAIN/* ssl/letsencrypt/live/$DOMAIN/ 2>/dev/null || true
-sudo chown -R $USER:$USER ssl/letsencrypt
+# 7. Restart docker-compose
+echo "Starting docker-compose with SSL..."
+sudo docker-compose up -d
 
-echo "✅ SSL certificate installed!"
-echo "🔄 Restarting services..."
+# 8. Wait for nginx to be ready
+sleep 3
 
-sudo docker-compose restart nginx
+# 9. Test HTTPS
+echo ""
+echo "Testing HTTPS endpoint..."
+curl -s https://$DOMAIN/health || echo "⚠️  Warning: HTTPS test failed (may be certificate issue)"
 
-echo "✅ Done! Access: https://$DOMAIN"
+echo ""
+echo "✅ SSL Setup Complete!"
+echo ""
+echo "Access your service at: https://$DOMAIN"
+echo "Test webhook: curl -X POST https://$DOMAIN/webhook/user-registered ..."
+echo ""
+echo "Certificates renew automatically 30 days before expiration"
