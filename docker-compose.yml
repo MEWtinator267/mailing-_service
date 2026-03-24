@@ -22,6 +22,8 @@ services:
         condition: service_healthy
     expose:
       - '3001'
+    ports:
+      - '3001:3001'
     environment:
       PORT: 3001
       NODE_ENV: production
