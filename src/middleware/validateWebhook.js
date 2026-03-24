@@ -27,6 +27,11 @@ const schemas = {
     type: Joi.string().valid('user.registered', 'user.login').required(),
     payload: Joi.object({
       email: Joi.string().email().required(),
+      first_name: Joi.string().allow('', null).optional(),
+      last_name: Joi.string().allow('', null).optional(),
+      registered_at: Joi.string().isoDate().allow('', null).optional(),
+      name: Joi.string().allow('', null).optional(),
+      logged_in_at: Joi.string().isoDate().allow('', null).optional(),
     }).required(),
   }),
 };

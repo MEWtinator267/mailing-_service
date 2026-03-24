@@ -112,12 +112,21 @@ async function handleUserLogin(req, res) {
 async function handleEvents(req, res) {
   const { type } = req.validatedBody;
   
-  if (type === 'user.registered') {
-    return handleUserRegistered(req, res);
-  } else if (type === 'user.login') {
-    return handleUserLogin(req, res);
-  } else {
-    return res.status(400).json({ success: false, error: 'Unsupported event type' });
+  console.log(`📧 [MAIL] Unified webhook received - Event Type: ${type}`);
+
+  try {
+    if (type === 'user.registered') {
+      return handleUserRegistered(req, res);
+    } else if (type === 'user.login') {
+      return handleUserLogin(req, res);
+    } else {
+      console.error(`❌ [MAIL] Unsupported event type: ${type}`);
+      return res.status(400).json({ success: false, error: 'Unsupported event type' });
+    }
+  } catch (err) {
+    console.error(`❌ [MAIL] Error in handleEvents: ${err.message}`);
+    logger.error('Error in unified webhook handler', { error: err.message, stack: err.stack });
+    return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 }
 
