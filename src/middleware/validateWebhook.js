@@ -21,6 +21,14 @@ const schemas = {
       logged_in_at: Joi.string().isoDate().allow('', null).optional(),
     }).required(),
   }),
+
+  // Combined schema for unified endpoint
+  'any': Joi.object({
+    type: Joi.string().valid('user.registered', 'user.login').required(),
+    payload: Joi.object({
+      email: Joi.string().email().required(),
+    }).required(),
+  }),
 };
 
 // Verify HMAC signature from EventRelay
@@ -43,9 +51,9 @@ function verifySignature(payload, signature, secret) {
   return signature === expectedSignature;
 }
 
-function validateWebhook(eventType) {
+function validateWebhook(eventType = 'any') {
   return (req, res, next) => {
-    const schema = schemas[eventType];
+    const schema = schemas[eventType] || schemas['any'];
     if (!schema) {
       return res.status(400).json({ success: false, error: 'Unknown event type' });
     }

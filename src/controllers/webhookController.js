@@ -108,4 +108,17 @@ async function handleUserLogin(req, res) {
   }
 }
 
-module.exports = { handleUserRegistered, handleUserLogin };
+// Unified handler - routes to appropriate handler based on event type
+async function handleEvents(req, res) {
+  const { type } = req.validatedBody;
+  
+  if (type === 'user.registered') {
+    return handleUserRegistered(req, res);
+  } else if (type === 'user.login') {
+    return handleUserLogin(req, res);
+  } else {
+    return res.status(400).json({ success: false, error: 'Unsupported event type' });
+  }
+}
+
+module.exports = { handleUserRegistered, handleUserLogin, handleEvents };
